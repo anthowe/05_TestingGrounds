@@ -10,7 +10,8 @@
 AS05_TestingGroundsHUD::AS05_TestingGroundsHUD()
 {
 	// Set the crosshair texture
-	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/Dynamic/Player/Character/Textures/FirstPersonCrosshair")); 
+	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/Static/Character/UE4_Mannequin/Textures/FirstPersonCrosshair")); 
+	CrosshairTex = CrosshairTexObj.Object;
 }
 
 
@@ -28,11 +29,10 @@ void AS05_TestingGroundsHUD::DrawHUD()
 										   (Center.Y + 20.0f));
 
 	// draw the crosshair
-	if (CrosshairTex) 
-	{
+	
 		FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->Resource, FLinearColor::White);
 		TileItem.BlendMode = SE_BLEND_Translucent;
 		Canvas->DrawItem(TileItem);
-	}
 	
 }
+	
