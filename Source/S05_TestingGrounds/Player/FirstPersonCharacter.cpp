@@ -59,7 +59,8 @@ void AFirstPersonCharacter::BeginPlay()
 	
 	Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
-	Gun->AnimInstance = Mesh1P->GetAnimInstance();
+	Gun->AnimInstance3P = GetMesh()->GetAnimInstance();
+	
 	if (EnableTouchscreenMovement(InputComponent) == false)
 	{
 		InputComponent->BindAction("Fire", IE_Pressed, Gun, &AGun::OnFire);
