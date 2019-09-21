@@ -5,6 +5,10 @@
 #include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "InfiniteTerrainGameMode.h"
+#include "ActorPool.h"
+
+
 
 // Sets default values
 ATile::ATile()
@@ -14,9 +18,29 @@ ATile::ATile()
 
 }
 
+
+void ATile::SetPool(UActorPool* InPool)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Setting Pool: %s"), *(this->GetName()), *(InPool->GetName()));
+	Pool = InPool;
+
+	PositionNavMeshBoundsVolume();
+}
+
+void ATile::PositionNavMeshBoundsVolume()
+{
+	NavMeshBoundsVolume = Pool->Checkout();
+
+	if (NavMeshBoundsVolume == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not Enough Actors in the Pool."));
+		return;
+	}
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
+}
+
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
 {
-	
 	int NumberToSpawn(FMath::RandRange(MinSpawn, MaxSpawn));
 	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
@@ -71,16 +95,22 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+
 
 }
 
+void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	Pool->Return(NavMeshBoundsVolume);
+}
 // Called every frame
 void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
+
 
 bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
