@@ -7,6 +7,8 @@
 #include "DrawDebugHelpers.h"
 #include "InfiniteTerrainGameMode.h"
 #include "ActorPool.h"
+#include "Engine/World.h"
+#include "NavigationSystem.h"
 
 
 
@@ -16,6 +18,11 @@ ATile::ATile()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	MinExtent = FVector(0, -2000, 0);
+
+	MaxExtent = FVector(4000, 2000, 0);
+
+	NavigationBoundsOffset = FVector(2000, 0, 0);
 }
 
 
@@ -33,10 +40,13 @@ void ATile::PositionNavMeshBoundsVolume()
 
 	if (NavMeshBoundsVolume == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not Enough Actors in the Pool."));
+		UE_LOG(LogTemp, Error, TEXT("[%s] Not Enough Actors in the Pool."), *GetName());
 		return;
 	}
-	NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
+	UE_LOG(LogTemp, Error, TEXT("[%s] CheckedOut"), *GetName(), *NavMeshBoundsVolume->GetName());
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
+	FNavigationSystem::Build(*GetWorld());
+
 }
 
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
@@ -61,9 +71,8 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 
 bool ATile::FindEmptyLocation(FVector &OutLocation, float Radius)
 {
-	FVector Min(0, -2000, 0);
-	FVector Max(4000, 2000, 0);
-	FBox Bounds(Min, Max);
+	
+	FBox Bounds(MinExtent, MaxExtent);
 	
 
 	const int MAX_ATTEMPTS = 100;
